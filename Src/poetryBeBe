@@ -1,0 +1,220 @@
+#!/bin/bash
+
+
+USERNAME="root"
+SCNAME="poetryBeBe"
+
+ME=`whoami`
+
+if [ $ME != $USERNAME ] ; then
+   echo "Please run the $USERNAME user."
+   exit
+fi
+
+install_poetry(){
+    pipx install poetry && pipx ensurepath
+    exit
+}
+ 
+update_all(){
+   poetry update
+   exit
+}
+
+install_requests (){
+
+    rm poetry.lock
+    poetry install
+
+   exit
+}
+
+bud(){
+    poetry build
+   exit
+}
+
+pro_ck(){
+   echo "正在准备中"
+   exit
+}
+
+ck_poetryBeBe(){
+    # 检查版本是否可以更新
+    # 将文件内容读取为变量
+    # 定义两个版本号变量
+    # version1="1.0.1"
+    # version2="1.0.2"
+    poetryBeBeVerOld=$(cat ./version.lock)
+    poetryBeBeVerNew=getlatestVersion()
+    # 使用 vercomp 函数比较版本号
+    result=$(vercomp $poetryBeBeVerOld $poetryBeBeVerNew)
+    if [ "$result" -eq "1" ]; then
+        echo "$poetryBeBeVerOld is greater than $poetryBeBeVerNew"
+    elif [ "$result" -eq "-1" ]; then
+        # 小于 =1
+        #echo "$poetryBeBeVerOld is less than $poetryBeBeVerNew"
+        echo 1
+    else
+        #相等 =0
+        #echo "$poetryBeBeVerOld is equal to $poetryBeBeVerNew"
+        echo 0
+    fi
+   
+}
+
+upoetryBeBe(){
+    # 根据版本号大小进行版本更新
+    isUp=ck_poetryBeBe()
+    if [ "$isUp" = 1 ]; then        
+        while true; do
+        # 提示用户输入
+            echo "官网有最新版可以更新,现在是否更新?(yes/no)"
+            echo "输入yes-更新/输入no-暂时不更新"
+            read answer
+            # 进行条件判断
+            if [ "$answer" = "yes" ]; then
+                echo "Okk, 现在开始进行更新,请不要进行操作,如果更新失败请重新执行,或者在命令行执行 git pull..."
+                poetryBeBeVerNew=getlatestVersion()
+                cp poetryBeB poetryBeB.back
+                curl -o poetryBeBe_New "https://github.com/aspnmy/poetryBeBe_free/releases/download/v${poetryBeBeVerNew}"
+                rm poetryBeB && mv poetryBeBe_New poetryBeBe
+                chmod u+x poetryBeB
+                break
+            elif [ "$answer" = "no" ]; then
+                echo "你输入了no, 现在退出中..."
+                # 在这里添加退出的命令或直接退出
+                exit 1
+
+            else
+                echo "失败输入. 请输入 (yes/no)."
+            fi
+        done
+    else
+        echo "现在使用的是最新版,无需更新."
+    fi
+
+}
+
+
+getlatestVersion(){
+    # GitHub 用户名和仓库名
+    username="aspnmy"
+    repo="poetryBeBe_free"
+
+    # GitHub API URL，用于获取最新的发布信息
+    github_api_url="https://api.github.com/repos/$username/$repo/releases/latest"
+
+    # 使用 curl 获取最新发布的 JSON 数据
+    latest_release_data=$(curl -s $github_api_url)
+
+    # 从 JSON 数据中提取 tag 名称
+    # 假设 tag 名称遵循 'vX.X.X' 的格式
+    latest_tag=$(echo $latest_release_data | grep '"tag_name":' | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
+
+    # 检查 latest_tag 是否为空，如果为空，则说明获取失败
+    if [ -z "$latest_tag" ]; then
+        echo "Failed to retrieve the latest tag from GitHub."
+        exit 1
+    fi
+    return $latest_tag
+}
+
+# 定义一个比较版本号的函数
+vercomp() {
+    if [[ $1 == $2 ]]; then
+        echo "0" # 相等
+        return
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # 逐段比较版本号
+    for ((i=0; i<${#ver1[@]}; i++)); do
+        if [[ -z ${ver2[i]} ]]; then
+            echo "-1" # $1 大于 $2
+            return
+        fi
+        if (( ver1[i] > ver2[i] )); then
+            echo "1" # $1 大于 $2
+            return
+        fi
+        if (( ver1[i] < ver2[i] )); then
+            echo "-1" # $1 小于 $2
+            return
+        fi
+    done
+    if [[ ${#ver1[@]} -lt ${#ver2[@]} ]]; then
+        echo "-1" # $1 小于 $2
+    else
+        echo "1" # $1 大于 $2
+    fi
+}
+
+
+
+
+
+# 定义一个函数来显示菜单
+show_menu(){
+    echo "poetryBeBe poetry哔哔小子,一个简单的poetry管理工具-免费版"
+    echo "tg讨论组:https://t.me/+BqvlH6BDOWE3NjQ1"
+    echo "请选择一个-选项:"
+    echo "1)install_poetry/安装并初始化poetry"
+    echo "2)install_requests/安装依赖(需要有pyproject.toml)"
+    echo "3)update_all/更新所有的已安装依赖"
+    echo "4)bud/编译组件"
+    echo "5)pro_ck/输入key启用专业版"
+    echo "6)upoetryBeBe/更新poetryBeBe到最新版"
+    echo "7)getlatestVersion/查看最新的版本号"
+    echo "0)退出"
+}
+
+# 无限循环,直到用户选择退出
+while true; do
+    show_menu
+    read -p "请输入你的选择: " choice
+
+    # 根据用户的选择执行不同的操作
+    case $choice in
+        1)
+            echo "你选择了-install_poetry/安装并初始化poetry"
+            install_init
+            ;;
+        2)
+            echo "你选择了-install_requests/安装依赖"
+            install_requests
+            ;;
+        3)
+            echo "你选择了-update_all/更新所有的已安装依赖"
+            update_all
+            ;;
+        4)
+            echo "你选择了-bud/编译组件"
+            bud
+            ;;
+        5)
+            echo "你选择了-pro_ck/输入key启用专业版"
+            pro_ck
+            ;;
+        6)
+            echo "你选择了-upoetryBeBe/更新poetryBeBe到最新版"
+            upoetryBeBe
+            ;;
+        7)
+            echo "你选择了-getlatestVersion/查看最新的版本号"
+            latestVersion=getlatestVersion()
+            local_version=$(cat ./version.lock)
+            echo "poetryBeBe poetry哔哔小子,一个简单的poetry管理工具-免费版"
+            echo "poetryBeBe poetry哔哔小子,线上最新的版本号是:'$latestVersion'"
+            echo "poetryBeBe poetry哔哔小子,本地的版本号是:'$local_version'"            
+            ;;              
+        0)
+            echo "退出菜单"
+            break
+            ;;            
+        *)
+            echo "无效的-选项,请重新输入。"
+            ;;
+    esac
+    echo "" # 打印一个空行以分隔菜单
+done
