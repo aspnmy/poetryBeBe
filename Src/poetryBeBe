@@ -157,7 +157,8 @@ vercomp() {
 # 定义一个函数来显示菜单
 show_menu(){
     echo "poetryBeBe poetry哔哔小子,一个简单的poetry管理工具-免费版"
-    echo "tg讨论组:https://t.me/+BqvlH6BDOWE3NjQ1"
+    echo "Tg讨论组:https://t.me/+BqvlH6BDOWE3NjQ1"
+    echo "赞助我们:TKqTUNcBWiRDdczuHoQstMD4XRyFgNwHiF (TRX/USDT)"
     echo "请选择一个-选项:"
     echo "1)install_poetry/安装并初始化poetry"
     echo "2)install_requests/安装依赖(需要有pyproject.toml)"
